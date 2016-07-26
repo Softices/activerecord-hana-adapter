@@ -133,7 +133,7 @@ module ActiveRecord
         #SELECT * FROM TABLE_COLUMNS WHERE SCHEMA_NAME='FIN' AND TABLE_NAME='SALESORDER'
 
         def parse_data_type(column_type)
-          return case htype
+          return case column_type
           when 'NVARCHAR', 'VARCHAR', 'CLOB', 'NCLOB', 'TEXT'
             ActiveRecord::Type::Text.new
           when ' ALPHANUM', 'SHORTTEXT'
