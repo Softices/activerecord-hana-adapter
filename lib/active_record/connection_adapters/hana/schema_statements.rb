@@ -129,11 +129,42 @@ module ActiveRecord
 
         # === Columns ========================================== #
 
+        # SELECT COLUMN_NAME, DEFAULT_VALUE, DATA_TYPE_NAME, IS_NULLABLE FROM TABLE_COLUMNS WHERE SCHEMA_NAME='FIN' AND TABLE_NAME='SALESORDER'
+        #SELECT * FROM TABLE_COLUMNS WHERE SCHEMA_NAME='FIN' AND TABLE_NAME='SALESORDER'
+
+        def parse_data_type(column_type)
+          return case htype
+          when 'NVARCHAR', 'VARCHAR', 'CLOB', 'NCLOB', 'TEXT'
+            ActiveRecord::Type::Text.new
+          when ' ALPHANUM', 'SHORTTEXT'
+            ActiveRecord::Type::String.new
+          when 'BLOB', 'BINTEXT'
+            ActiveRecord::Type::Binary.new
+          when 'DATE', 'SECONDDATE'
+            ActiveRecord::Type::Date.new
+          when 'TIMESTAMP'
+            ActiveRecord::Type::DateTime.new
+          when 'TIME'
+            ActiveRecord::Type::Time.new
+          when 'TINYINT', 'SMALLINT', 'INTEGER'
+            ActiveRecord::Type::Integer.new
+          when 'BIGINT'
+            ActiveRecord::Type::BigInteger.new
+          when 'SMALLDECIMAL', 'DECIMAL', 'REAL', 'DOUBLE'
+            ActiveRecord::Type::Decimal.new
+          when 'BOOLEAN'
+            ActiveRecord::Type::Boolean.new
+          else
+            nil
+          end
+        end
+
         def columns(table_name, name = nil)
           return [] if table_name.blank?
 
           table_structure(table_name).map do |column|
-            HanaColumn.new column[0], column[1], column[2], column[3]
+            # HanaColumn.new column[0], column[1], column[2], column[3]
+            HanaColumn.new column[0], column[1], parse_data_type(column[2]), column[2], column[3]
           end
         end
 
