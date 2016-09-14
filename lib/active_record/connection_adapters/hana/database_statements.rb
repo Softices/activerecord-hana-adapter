@@ -34,6 +34,14 @@ module ActiveRecord
         # === Executing ============================ #
 
         def exec_query(sql, name = nil, binds = [])
+          #
+          # Dirty hack
+          # To Do: Find proper patch and fix this dirty hack.
+          #
+          while (x = sql.match /(["'])[^. '"]+\.[^"]+["']/)
+            sql = sql.gsub(x[0], x[0].gsub(".", "#{x[1]}.#{x[1]}"))
+          end
+
           log(sql, name, binds) do
       
             # Don't cache statements without bind values
@@ -46,7 +54,7 @@ module ActiveRecord
             else
               # without statement caching
               args = bind_params(sql,binds)
-              stmt = @connection.run(*args)
+              stmt = @connection.run(sql)
               cols = stmt.columns(true).map { |c| c.name }
               records = stmt.fetch_all || []
               stmt.drop
